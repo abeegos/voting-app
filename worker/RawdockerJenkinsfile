@@ -31,19 +31,16 @@ pipeline {
             }
         }
 
-        stage('docker-package') {
+        stage('package') {
             when {
                 branch 'master'
                 changeset "**/worker/**"
             }
             steps {
-                echo 'Packaging worker app with docker'
-                script {
-                    docker.withRegistry('https://index.docker.io/v1', 'dockerlogin') {
-                        def workerImage = docker.build("systemswrangler/worker:v${env.BUILD_ID}", "./worker")
-                        workerImage.push()
-                        workerImage.push("${env.BRANCH_NAME}")
-                    }
+                echo 'Packaging worker app'
+                dir('worker') {
+                    sh 'mvn package -DskipTests'
+                    archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
                 }
             }
         }
