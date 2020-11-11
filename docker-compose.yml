@@ -1,0 +1,49 @@
+version: '3.7'
+
+
+services:
+
+  vote:
+    image: systemswrangler/vote:master
+    ports:
+      - 5000:80
+    depends_on:
+      - redis
+    networks:
+      - voting
+
+  result:
+    image: systemswrangler/result:master
+    ports:
+      - 5001:4000
+    depends_on:
+      - db
+    networks:
+      - voting
+
+  worker:
+    image: systemswrangler/worker:master
+    depends_on:
+      - db
+      - redis
+    networks:
+      - voting
+
+  redis:
+    image: redis:alpine
+    networks:
+      - voting
+
+  db:
+    image: postgres:9.4
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - voting
+
+
+volumes:
+  db-data:
+
+networks:
+  voting:
